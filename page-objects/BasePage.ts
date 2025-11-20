@@ -61,12 +61,13 @@ export class BasePage {
   }
 
   /**
-   * Wait for element to be clickable
+   * Wait for element to be clickable (mobile-compatible)
    * @param element - The element to wait for
    * @param timeout - Timeout in milliseconds (default: 10000)
    */
   async waitForClickable(element: any, timeout: number = 10000) {
-    await element.waitForClickable({ timeout });
+    await element.waitForDisplayed({ timeout });
+    await element.waitForEnabled({ timeout });
   }
 
   /**
@@ -74,7 +75,7 @@ export class BasePage {
    * @param element - The element to click
    */
   async clickElement(element: any) {
-    await this.waitForClickable(element);
+    await this.waitForElement(element);
     await element.click();
   }
 
