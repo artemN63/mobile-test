@@ -20,12 +20,39 @@ export class ViewsPage extends BasePage {
   }
 
   /**
+   * Swipe by pixel coordinates
+   */
+  async swipeByCoordinates(
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number
+  ) {
+    await this.driver.performActions([
+      {
+        type: "pointer",
+        id: "finger1",
+        parameters: { pointerType: "touch" },
+        actions: [
+          { type: "pointerMove", duration: 0, x: startX, y: startY },
+          { type: "pointerDown", button: 0 },
+          { type: "pause", duration: 500 },
+          { type: "pointerMove", duration: 500, x: endX, y: endY },
+          { type: "pointerUp", button: 0 },
+        ],
+      },
+    ]);
+    await this.driver.releaseActions();
+  }
+
+  /**
    * Scroll to the bottom of the list
    */
   async scrollToBottom() {
     const size = await this.driver.getWindowSize();
-    const listElement = await this.driver.$('android.widget.ListView');
-    const elementId = await listElement.elementId;
+    const startX = Math.round(size.width / 2);
+    const startY = Math.round(size.height * 0.8);
+    const endY = Math.round(size.height * 0.2);
     
     let previousPageSource = '';
     let currentPageSource = await this.driver.getPageSource();
@@ -34,11 +61,7 @@ export class ViewsPage extends BasePage {
 
     while (previousPageSource !== currentPageSource && attempts < maxAttempts) {
       previousPageSource = currentPageSource;
-      await this.driver.execute('mobile: scrollGesture', {
-        elementId,
-        direction: 'down',
-        percent: 0.75
-      });
+      await this.swipeByCoordinates(startX, startY, startX, endY);
       await this.pause(300);
       currentPageSource = await this.driver.getPageSource();
       attempts++;
@@ -50,8 +73,9 @@ export class ViewsPage extends BasePage {
    */
   async scrollToTop() {
     const size = await this.driver.getWindowSize();
-    const listElement = await this.driver.$('android.widget.ListView');
-    const elementId = await listElement.elementId;
+    const startX = Math.round(size.width / 2);
+    const startY = Math.round(size.height * 0.2);
+    const endY = Math.round(size.height * 0.8);
     
     let previousPageSource = '';
     let currentPageSource = await this.driver.getPageSource();
@@ -60,11 +84,7 @@ export class ViewsPage extends BasePage {
 
     while (previousPageSource !== currentPageSource && attempts < maxAttempts) {
       previousPageSource = currentPageSource;
-      await this.driver.execute('mobile: scrollGesture', {
-        elementId,
-        direction: 'up',
-        percent: 0.75
-      });
+      await this.swipeByCoordinates(startX, startY, startX, endY);
       await this.pause(300);
       currentPageSource = await this.driver.getPageSource();
       attempts++;
